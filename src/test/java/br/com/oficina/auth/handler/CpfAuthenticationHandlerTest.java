@@ -26,7 +26,8 @@ class CpfAuthenticationHandlerTest {
   private static final ObjectMapper JSON = new ObjectMapper();
 
   private final AuthConfig config =
-      TestKeys.config(TestKeys.generate(), "fiap-tc-fase4-oficina-auth-serverless", "oficina-backend", 900);
+      TestKeys.config(
+          TestKeys.generate(), "fiap-tc-fase4-oficina-auth-serverless", "oficina-backend", 900);
   private final RecordingContext context = new RecordingContext("lambda-request-1");
 
   @Test
