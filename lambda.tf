@@ -1,0 +1,106 @@
+locals {
+  name         = "${var.project_name}-${var.environment}"
+  lab_role_arn = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
+}
+
+resource "aws_cloudwatch_log_group" "login" {
+  name              = "/aws/lambda/${local.name}-login"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_group" "authorizer" {
+  name              = "/aws/lambda/${local.name}-authorizer"
+  retention_in_days = 7
+}
+
+resource "aws_lambda_function" "login" {
+  function_name = "${local.name}-login"
+  description   = "Autenticação de cliente por CPF"
+  role          = local.lab_role_arn
+  runtime       = "java21"
+  architectures = ["arm64"]
+  handler       = local.login_handler
+  layers        = local.newrelic_layers
+
+  filename         = var.lambda_package_path
+  source_code_hash = filebase64sha256(var.lambda_package_path)
+  # Com 512 MB, a inicialização da JVM com o agente Java do New Relic passava dos 15 s
+  # do API Gateway em cold start; 1024 MB dá mais CPU à função, como no authorizer.
+  memory_size = 1024
+  timeout     = 15
+
+  # Na VPC, a função sai pela NAT para o LoadBalancer do OS Service.
+  vpc_config {
+    subnet_ids         = var.private_subnet_ids
+    security_group_ids = [var.lambda_security_group_id]
+  }
+
+  environment {
+    variables = merge(
+      {
+        # O cliente é consultado no OS Service por REST; o Auth não acessa o banco do OS.
+        OS_SERVICE_BASE_URL = var.backend_base_url == null ? "" : var.backend_base_url
+        INTERNAL_API_KEY    = var.notification_api_key
+        JWT_PRIVATE_KEY     = var.jwt_private_key
+        JWT_PUBLIC_KEY      = var.jwt_public_key
+        JWT_ISSUER          = var.jwt_issuer
+        JWT_AUDIENCE        = var.jwt_audience
+        JWT_TTL_SECONDS     = tostring(var.jwt_ttl_seconds)
+        ENVIRONMENT         = var.environment
+      },
+      local.newrelic_environment
+    )
+  }
+
+  logging_config {
+    log_format            = "JSON"
+    application_log_level = "INFO"
+    system_log_level      = "WARN"
+  }
+
+  lifecycle {
+    precondition {
+      condition     = !var.newrelic_instrumentation_enabled || local.newrelic_credentials_present
+      error_message = "Informe newrelic_license_key e newrelic_account_id para instrumentar as Lambdas."
+    }
+  }
+
+  depends_on = [aws_cloudwatch_log_group.login]
+}
+
+resource "aws_lambda_function" "authorizer" {
+  function_name = "${local.name}-authorizer"
+  description   = "Validação de JWT para rotas protegidas"
+  role          = local.lab_role_arn
+  runtime       = "java21"
+  architectures = ["arm64"]
+  handler       = local.authorizer_handler
+  layers        = local.newrelic_layers
+
+  filename         = var.lambda_package_path
+  source_code_hash = filebase64sha256(var.lambda_package_path)
+  # O API Gateway espera o authorizer por no máximo 10 s; com o agente Java do New Relic,
+  # o cold start com 384 MB passava desse limite e a rota respondia 500.
+  memory_size = 1024
+  timeout     = 10
+
+  environment {
+    variables = merge(
+      {
+        JWT_PUBLIC_KEY = var.jwt_public_key
+        JWT_ISSUER     = var.jwt_issuer
+        JWT_AUDIENCE   = var.jwt_audience
+        ENVIRONMENT    = var.environment
+      },
+      local.newrelic_environment
+    )
+  }
+
+  logging_config {
+    log_format            = "JSON"
+    application_log_level = "INFO"
+    system_log_level      = "WARN"
+  }
+
+  depends_on = [aws_cloudwatch_log_group.authorizer]
+}
