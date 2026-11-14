@@ -42,14 +42,18 @@ Porta de entrada pública da Oficina: **login do cliente por CPF**, **Lambda Aut
 
 ## 3. Stack técnica
 
-| Área | Tecnologias |
-|---|---|
-| Código | Java 21, Maven Wrapper, AWS Lambda Java Core/Events, Jackson |
-| Segurança | JJWT 0.12 (RS256), Lambda Authorizer REQUEST (payload 2.0, respostas simples) |
-| AWS | API Gateway HTTP API v2, Lambda `java21` arm64, SNS, SQS (DLQ), SES, CloudWatch Logs; `java.net.http.HttpClient` para consultar o OS Service |
-| Infraestrutura | Terraform + HCP Terraform (workspaces `homolog` e `production`) |
-| Qualidade | JUnit 5, ArchUnit, Spotless, TFLint, Trivy, Gitleaks, actionlint |
-| Observabilidade | logs JSON, camada New Relic Java (ARM64), log forwarder do API Gateway para o New Relic |
+- **Linguagem:** Java 21 (Maven Wrapper), Jackson
+- **Runtime:** AWS Lambda `java21` arm64 (AWS Lambda Java Core/Events)
+- **API:** Amazon API Gateway HTTP API v2
+- **Segurança:** JJWT 0.12 (RS256), Lambda Authorizer REQUEST (payload 2.0, respostas simples)
+- **Integração:** `java.net.http.HttpClient` para consultar o OS Service
+- **Notificações:** Amazon SNS, SQS (DLQ) e SES
+- **Infraestrutura:** Terraform ≥ 1.6 + HCP Terraform (workspaces `homolog` e `production`)
+- **Testes:** JUnit 5, ArchUnit
+- **Formatação:** Spotless
+- **CI/CD:** GitHub Actions
+- **Qualidade e segurança:** TFLint, Trivy, Gitleaks, actionlint
+- **Observabilidade:** logs JSON no CloudWatch Logs, camada New Relic Java (ARM64), log forwarder do API Gateway para o New Relic
 
 ## 4. Arquitetura
 
