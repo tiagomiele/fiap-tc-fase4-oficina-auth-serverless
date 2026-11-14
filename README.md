@@ -1,8 +1,8 @@
+> Documentação central da Challenge Fase 4 em: [fiap-tc-fase4-oficina-os-service](https://github.com/tiagomiele/fiap-tc-fase4-oficina-os-service).
+
 # Oficina Fase 4 — Auth Serverless
 
 Porta de entrada pública da Oficina: **login do cliente por CPF**, **Lambda Authorizer JWT** na frente dos serviços do EKS, **API Gateway** com as rotas do cliente e do webhook do Mercado Pago, e **notificações assíncronas** (SNS → Lambda → SES/log, com DLQ).
-
-> Documentação central da Fase 4: [fiap-tc-fase4-oficina-os-service](https://github.com/tiagomiele/fiap-tc-fase4-oficina-os-service). Este README cobre só o Auth Serverless.
 
 ## 1. Objetivo de negócio
 
@@ -12,7 +12,7 @@ Porta de entrada pública da Oficina: **login do cliente por CPF**, **Lambda Aut
 - O Mercado Pago tem uma URL pública estável (`/webhooks/mercadopago`) para avisar pagamentos.
 - E-mails ao cliente não travam a OS: são enfileirados e reprocessados; falhas definitivas ficam na DLQ.
 
-## 2. Requisitos atendidos
+## 2. Requisitos a serem atendidos
 
 **Funcionais**
 
@@ -197,7 +197,7 @@ aws sqs get-queue-attributes --queue-url (aws sqs get-queue-url --queue-name ofi
 | [fiap-tc-fase4-oficina-database-infra](https://github.com/tiagomiele/fiap-tc-fase4-oficina-database-infra) | RDS, DynamoDB, SQS e DLQs |
 | [fiap-tc-fase4-oficina-kubernetes-infra](https://github.com/tiagomiele/fiap-tc-fase4-oficina-kubernetes-infra) | EKS e New Relic |
 
-Base histórica: [Fase 3 — Auth Serverless](https://github.com/tiagomiele/fiap-tech-challenge-fase3-fiap-tc-fase4-oficina-auth-serverless).
+Base histórica: [Fase 3 — Auth Serverless](https://github.com/tiagomiele/fiap-tech-challenge-fase3-oficina-auth-serverless).
 
 ## Licença
 
