@@ -201,8 +201,6 @@ aws sqs get-queue-attributes --queue-url (aws sqs get-queue-url --queue-name ofi
 | [fiap-tc-fase4-oficina-database-infra](https://github.com/tiagomiele/fiap-tc-fase4-oficina-database-infra) | RDS, DynamoDB, SQS e DLQs |
 | [fiap-tc-fase4-oficina-kubernetes-infra](https://github.com/tiagomiele/fiap-tc-fase4-oficina-kubernetes-infra) | EKS e New Relic |
 
-Base histórica: [Fase 3 — Auth Serverless](https://github.com/tiagomiele/fiap-tech-challenge-fase3-oficina-auth-serverless).
-
 ## Licença
 
 [LICENSE](LICENSE)
